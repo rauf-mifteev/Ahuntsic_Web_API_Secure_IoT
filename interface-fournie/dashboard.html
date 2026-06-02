@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tableau de bord — Console d'alertes</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+  <header class="entete-app">
+    <div class="entete-gauche">
+      <h1>Console de supervision d'alertes</h1>
+      <span class="indicateur-connexion" id="indicateur-connexion" title="État Socket.IO">●</span>
+    </div>
+    <div class="entete-droite">
+      <span id="info-utilisateur"></span>
+      <button id="btn-statistiques" class="bouton-secondaire" hidden>Statistiques</button>
+      <button id="btn-deconnexion"  class="bouton-secondaire">Se déconnecter</button>
+    </div>
+  </header>
+
+  <main class="page-dashboard">
+
+    <!-- Section filtres -->
+    <section class="bloc-filtres">
+      <input type="search"  id="filtre-q"        placeholder="Rechercher dans le message…" />
+      <select id="filtre-niveau">
+        <option value="">— Tous les niveaux —</option>
+        <option value="info">Info</option>
+        <option value="avertissement">Avertissement</option>
+        <option value="critique">Critique</option>
+      </select>
+      <select id="filtre-etat">
+        <option value="">— Tous les états —</option>
+        <option value="false">Non résolues</option>
+        <option value="true">Résolues</option>
+      </select>
+      <button id="btn-rafraichir" class="bouton-secondaire">Rafraîchir</button>
+    </section>
+
+    <!-- Section ajout (visible selon rôle) -->
+    <section class="bloc-ajout" id="bloc-ajout" hidden>
+      <h2>Ajouter une alerte manuelle</h2>
+      <form id="form-ajout">
+        <input type="text"   id="ajout-source"  placeholder="Source (ex. Serveur web-01)" required />
+        <input type="text"   id="ajout-type"    placeholder="Type (ex. cpu)" required />
+        <select id="ajout-niveau" required>
+          <option value="">— Niveau —</option>
+          <option value="info">Info</option>
+          <option value="avertissement">Avertissement</option>
+          <option value="critique">Critique</option>
+        </select>
+        <input type="text"   id="ajout-message" placeholder="Message" required />
+        <button type="submit">Ajouter</button>
+      </form>
+    </section>
+
+    <!-- Section liste -->
+    <section class="bloc-liste">
+      <h2>Alertes <span id="badge-total" class="badge-total">0</span></h2>
+      <div id="zone-alertes" class="zone-alertes"></div>
+      <div class="bloc-pagination">
+        <button id="btn-precedent" class="bouton-secondaire" disabled>&laquo; Précédent</button>
+        <span id="info-page">Page 1 / 1</span>
+        <button id="btn-suivant"   class="bouton-secondaire" disabled>Suivant &raquo;</button>
+      </div>
+    </section>
+
+    <!-- Section statistiques (admin uniquement) -->
+    <section class="bloc-statistiques" id="bloc-statistiques" hidden>
+      <h2>Statistiques sur 24 h</h2>
+      <div id="zone-statistiques"></div>
+    </section>
+
+  </main>
+
+  <!-- Zone de toasts -->
+  <div class="zone-toasts" id="zone-toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

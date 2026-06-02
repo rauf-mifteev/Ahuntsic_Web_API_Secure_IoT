@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — Console de supervision d'alertes</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page-connexion">
+    <section class="carte-connexion">
+      <h1>Console de supervision d'alertes</h1>
+      <p class="sous-titre">Projet final intégrateur — 420-317-AH</p>
+
+      <form id="form-connexion" novalidate>
+        <label for="courriel">Courriel</label>
+        <input type="email" id="courriel" name="courriel" autocomplete="email" required />
+
+        <label for="motDePasse">Mot de passe</label>
+        <input type="password" id="motDePasse" name="motDePasse" autocomplete="current-password" required />
+
+        <button type="submit">Se connecter</button>
+
+        <p id="msg-erreur" class="msg-erreur" role="alert"></p>
+      </form>
+
+      <details class="comptes-demo">
+        <summary>Comptes de démonstration</summary>
+        <table>
+          <thead>
+            <tr><th>Courriel</th><th>Mot de passe</th><th>Rôle</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>lecteur@cours.qc.ca</td>        <td><code>Motdepasse1!</code></td><td>lecteur</td></tr>
+            <tr><td>operateur@cours.qc.ca</td>      <td><code>Motdepasse1!</code></td><td>opérateur</td></tr>
+            <tr><td>administrateur@cours.qc.ca</td> <td><code>Motdepasse1!</code></td><td>administrateur</td></tr>
+            <tr><td>agent@cours.qc.ca</td>          <td><code>Motdepasse1!</code></td><td>opérateur (service)</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+
+    <footer>
+      Collège Ahuntsic — AEC LEA.DP — Été 2026
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
