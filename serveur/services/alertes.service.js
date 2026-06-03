@@ -1,19 +1,13 @@
 /* ============================================================
    services/alertes.service.js — Logique métier des alertes
    ------------------------------------------------------------
-   Évolution depuis l'examen pratique 2 :
-     - lister() / obtenirParId() utilisent .populate() pour
-       exposer creeePar / resoluePar avec courriel + nom ;
-     - creer(donnees, utilisateurId) injecte creeePar ;
-     - resoudre(id, utilisateurId) injecte resoluePar ;
-     - supprimer(id, utilisateurId) écrit un audit avant la
-       suppression définitive (collection AlerteAuditSupression).
-
+   
    Ce module ne touche jamais à req / res, ni à Socket.IO.
    ============================================================ */
 
 const Alerte                = require("../modeles/Alerte");
 const AlerteAuditSupression = require("../modeles/AlerteAuditSupression");
+const Utilisateur           = require("../modeles/Utilisateur");
 const { construireOptions, enveloppePaginee } = require("./requete");
 
 /* ---------- Aide ----------------------------------------- */
@@ -54,13 +48,10 @@ async function obtenirParId(id) {
 /* ---------- 3. Créer ------------------------------------- */
 
 async function creer({ source, type, niveau, message }, utilisateurId) {
-  // On ne passe que les 4 champs métier autorisés au client.
-  // creeePar est injecté ici, pas par le client.
   const alerte = await Alerte.create({
     source, type, niveau, message,
     creeePar: utilisateurId
   });
-  // Re-fetch pour bénéficier du populate dans la réponse.
   return Alerte.findById(alerte._id).populate("creeePar resoluePar", CHAMPS_REFS);
 }
 
@@ -109,9 +100,13 @@ async function resoudre(id, utilisateurId) {
 async function supprimer(id, utilisateurId) {
   // 1) Charger l'alerte AVANT la suppression pour capturer l'aperçu.
   const alerte = await Alerte.findById(id);
-  if (!alerte) return null;
+  if (!alerte) return { alerte: null, supprimeeParCourriel: null };
 
-  // 2) Écrire l'audit (traçabilité).
+  // 2) Récupérer le courriel de l'utilisateur qui supprime
+  const utilisateur = await Utilisateur.findById(utilisateurId).select("courriel");
+  const supprimeeParCourriel = utilisateur ? utilisateur.courriel : "inconnu";
+
+  // 3) Écrire l'audit (traçabilité).
   await AlerteAuditSupression.create({
     alerteId:     alerte._id,
     supprimeePar: utilisateurId,
@@ -119,9 +114,10 @@ async function supprimer(id, utilisateurId) {
     apercuNiveau: alerte.niveau
   });
 
-  // 3) Supprimer définitivement.
+  // 4) Supprimer définitivement.
   await alerte.deleteOne();
-  return alerte;
+
+  return { alerte, supprimeeParCourriel };
 }
 
 
