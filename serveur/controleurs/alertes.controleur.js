@@ -1,12 +1,14 @@
 /* ============================================================
-   controleurs/alertes.controleur.js — Couche HTTP des alertes
+   controleurs/alertes.controleur.js — Couche HTTP alertes étape 3
    ------------------------------------------------------------
-   Évolution depuis l'EP2 :
-     - chaque action passe req.utilisateur.id au service ;
-     - les erreurs sont passées à next(erreur) plutôt que gérées
-       localement (middleware central gère tout).
+   Evolutions par rapport à l'étape 1 :
+     - après chaque opération réussie (POST, PATCH, DELETE),
+       le contrôleur émet l'événement Socket.IO correspondant
+       via req.app.get("io").emit(...).
 
-   Aucun appel Mongoose ici (séparation des couches).
+   Le service retourne le document complet (populé), le
+   contrôleur diffuse sur Socket.IO, puis répond au client REST.
+   Le service ne sait toujours rien de Socket.IO.
    ============================================================ */
 
 const service = require("../services/alertes.service");
@@ -43,13 +45,16 @@ async function obtenir(req, res, next) {
 
 async function creer(req, res, next) {
   try {
-    // Seuls 4 champs sont acceptés du client. Le reste est ignoré.
-    // creeePar est injecté par le service (req.utilisateur.id).
     const { source, type, niveau, message } = req.body || {};
     const alerte = await service.creer(
       { source, type, niveau, message },
       req.utilisateur.id
     );
+
+    // Diffusion temps réel après la persistance.
+    // Tous les clients connectés reçoivent l'alerte complète.
+    req.app.get("io").emit("alerte:nouvelle", alerte);
+
     res.status(201).json({ message: "Alerte ajoutée.", alerte });
   } catch (erreur) {
     next(erreur);
@@ -70,6 +75,10 @@ async function remplacer(req, res, next) {
     if (!alerte) {
       return res.status(404).json({ message: "Alerte introuvable." });
     }
+
+    // Un remplacement complet se traite comme une nouvelle alerte.
+    req.app.get("io").emit("alerte:nouvelle", alerte);
+
     res.status(200).json({ message: "Alerte remplacée.", alerte });
   } catch (erreur) {
     next(erreur);
@@ -85,6 +94,11 @@ async function resoudre(req, res, next) {
     if (alerte === null) {
       return res.status(404).json({ message: "Alerte introuvable." });
     }
+
+    // L'interface affichera un toast "Alerte résolue" et
+    // mettra à jour la carte (fond gris, champ resoluePar).
+    req.app.get("io").emit("alerte:resolue", alerte);
+
     res.status(200).json({ message: "Alerte résolue.", alerte });
   } catch (erreur) {
     next(erreur);
@@ -100,6 +114,14 @@ async function supprimer(req, res, next) {
     if (!alerte) {
       return res.status(404).json({ message: "Alerte introuvable." });
     }
+
+    // La charge utile n'a besoin que de l'id pour que l'interface
+    // sache quelle carte retirer de la liste.
+    req.app.get("io").emit("alerte:supprimee", {
+      id:           req.params.id,
+      supprimeePar: { id: req.utilisateur.id }
+    });
+
     res.status(200).json({
       message: "Alerte supprimée.",
       id:      req.params.id
