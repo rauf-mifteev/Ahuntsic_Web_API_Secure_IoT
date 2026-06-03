@@ -1,20 +1,20 @@
 /* ============================================================
-   app.js — Point d'entrée du serveur (Projet final — Etape 1)
+   app.js — Point d'entrée du serveur (Projet final — Etape 2)
    ------------------------------------------------------------
-   Evolutions par rapport à l'EP2 :
-     1. Lecture/validation de la config dans config/config.js.
-     2. CORS avec liste blanche d'origines.
-     3. express.json avec limite de taille.
-     4. Routes /api/auth et /api/alertes (protégées par rôle).
-     5. Middleware d'erreur central (4 arguments) en queue.
-
+   Evolutions par rapport à l'étape 1 :
+     1. On crée un serveur HTTP explicite (http.createServer).
+     2. Socket.IO est branché sur ce serveur HTTP via socket.js.
+     3. L'instance io est exposée à Express via app.set("io", io).
+     4. Le serveur écoute sur serveurHttp (pas directement app).
    ============================================================ */
 
+const http    = require("http");
 const express = require("express");
 const cors    = require("cors");
 
 const config              = require("./config/config");
 const { connecterBD }     = require("./config/bd");
+const { initialiser }     = require("./socket");
 const { middlewareErreur }= require("./controleurs/erreurs.middleware");
 
 const authRoutes    = require("./routes/auth.routes");
@@ -30,7 +30,7 @@ const app = express();
 
 app.use(cors({
   origin: (origine, callback) => {
-    //if (!origine) return callback(null, true);    // Insomnia / curl
+    //if (!origine) return callback(null, true);
     if (!origine || origine === "null") return callback(null, true); // Insomnia / curl / file://
     if (config.corsOrigines.includes(origine)) return callback(null, true);
     return callback(new Error(`Origine non autorisée : ${origine}`));
@@ -40,7 +40,6 @@ app.use(cors({
 
 app.use(express.json({ limit: config.tailleMaxCorps }));
 
-// Journalisation : méthode + URL + statut + durée.
 app.use((req, res, next) => {
   const debut = Date.now();
   res.on("finish", () => {
@@ -57,26 +56,36 @@ app.use((req, res, next) => {
 app.use("/api/auth",    authRoutes);
 app.use("/api/alertes", alertesRoutes);
 
-// 404 par défaut pour les URLs inconnues.
 app.use((req, res) => {
   res.status(404).json({ message: "Ressource introuvable." });
 });
 
-// Middleware d'erreur central 
 app.use(middlewareErreur);
 
 
 /* ------------------------------------------------------------
-   3) Démarrage
+   3) Serveur HTTP + Socket.IO
    ------------------------------------------------------------ */
 
-const PORT = config.port;
+// On crée d'abord le serveur HTTP à partir de l'app Express,
+// puis on y branche Socket.IO. Les deux partagent le même port.
+const serveurHttp = http.createServer(app);
+const io          = initialiser(serveurHttp);
+
+// Mise à disposition de `io` pour les contrôleurs :
+//   req.app.get("io").emit("alerte:nouvelle", alerte)
+app.set("io", io);
+
+
+/* ------------------------------------------------------------
+   4) Démarrage
+   ------------------------------------------------------------ */
 
 async function demarrer() {
   try {
     await connecterBD(config.mongoUri);
-    app.listen(PORT, () => {
-      console.log(`Serveur en écoute sur http://localhost:${PORT}`);
+    serveurHttp.listen(config.port, () => {
+      console.log(`HTTP + Socket.IO sur http://localhost:${config.port}  [${config.nodeEnv}]`);
     });
   } catch (erreur) {
     console.error("Démarrage annulé :", erreur.message);
