@@ -1,5 +1,5 @@
 /* ============================================================
-   controleurs/alertes.controleur.js — Couche HTTP alertes étape 3
+   controleurs/alertes.controleur.js — Couche HTTP alertes Etape 3
    ------------------------------------------------------------
    Evolutions par rapport à l'étape 1 :
      - après chaque opération réussie (POST, PATCH, DELETE),
@@ -51,8 +51,6 @@ async function creer(req, res, next) {
       req.utilisateur.id
     );
 
-    // Diffusion temps réel après la persistance.
-    // Tous les clients connectés reçoivent l'alerte complète.
     req.app.get("io").emit("alerte:nouvelle", alerte);
 
     res.status(201).json({ message: "Alerte ajoutée.", alerte });
@@ -76,7 +74,6 @@ async function remplacer(req, res, next) {
       return res.status(404).json({ message: "Alerte introuvable." });
     }
 
-    // Un remplacement complet se traite comme une nouvelle alerte.
     req.app.get("io").emit("alerte:nouvelle", alerte);
 
     res.status(200).json({ message: "Alerte remplacée.", alerte });
@@ -95,8 +92,6 @@ async function resoudre(req, res, next) {
       return res.status(404).json({ message: "Alerte introuvable." });
     }
 
-    // L'interface affichera un toast "Alerte résolue" et
-    // mettra à jour la carte (fond gris, champ resoluePar).
     req.app.get("io").emit("alerte:resolue", alerte);
 
     res.status(200).json({ message: "Alerte résolue.", alerte });
@@ -110,16 +105,18 @@ async function resoudre(req, res, next) {
 
 async function supprimer(req, res, next) {
   try {
-    const alerte = await service.supprimer(req.params.id, req.utilisateur.id);
+    const { alerte, supprimeeParCourriel } = await service.supprimer(
+      req.params.id,
+      req.utilisateur.id
+    );
+
     if (!alerte) {
       return res.status(404).json({ message: "Alerte introuvable." });
     }
 
-    // La charge utile n'a besoin que de l'id pour que l'interface
-    // sache quelle carte retirer de la liste.
     req.app.get("io").emit("alerte:supprimee", {
       id:           req.params.id,
-      supprimeePar: { id: req.utilisateur.id }
+      supprimeePar: { courriel: supprimeeParCourriel }
     });
 
     res.status(200).json({
