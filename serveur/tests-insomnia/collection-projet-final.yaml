@@ -1,0 +1,867 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Station meteo — Projet final
+meta:
+  id: wrk_3714ed79098f44318cf96615454dcbd3
+  created: 1780596979120
+  modified: 1780596979120
+  description: ""
+collection:
+  - name: 01 — Authentification
+    meta:
+      id: fld_cd36a21c5dd144149665e7adea5f665c
+      created: 1780596979148
+      modified: 1780596979148
+      sortKey: -1780596979148
+      description: ""
+    children:
+      - url: "{{ base_url }}/api/auth/inscription"
+        name: Inscription — 201 (nouveau compte)
+        meta:
+          id: req_25dd47dfd5a846b29de078790ff11189
+          created: 1780596979167
+          modified: 1780596979167
+          isPrivate: false
+          description: "Cree un nouveau compte avec le role lecteur par defaut. Attendu :
+            201."
+          sortKey: -1780596979168
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "nouveau@exemple.ca",
+              "nom": "Nouveau Utilisateur",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/connexion"
+        name: Connexion lecteur — 200
+        meta:
+          id: req_0175ea4b89b248afa69af8d68676da79
+          created: 1780596979177
+          modified: 1780596979177
+          isPrivate: false
+          description: "Copier le token retourne dans la variable token_lecteur de
+            l'environnement. Attendu : 200 + token."
+          sortKey: -1780596979177
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "lecteur@cours.qc.ca",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/connexion"
+        name: Connexion operateur — 200
+        meta:
+          id: req_1e1b8af88ed043cdad79cec658ad0e92
+          created: 1780596979182
+          modified: 1780596979182
+          isPrivate: false
+          description: "Copier le token retourne dans la variable token_operateur. Attendu
+            : 200 + token."
+          sortKey: -1780596979182
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "operateur@cours.qc.ca",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/connexion"
+        name: Connexion administrateur — 200
+        meta:
+          id: req_034c19be6937496f810f08fd3740a4ce
+          created: 1780596979187
+          modified: 1780596979187
+          isPrivate: false
+          description: "Copier le token retourne dans la variable token_admin. Attendu :
+            200 + token."
+          sortKey: -1780596979187
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "administrateur@cours.qc.ca",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/moi"
+        name: Profil courant (GET /moi) — 200
+        meta:
+          id: req_dc8abe26db65410798a62bd619a76682
+          created: 1780596979193
+          modified: 1780596979193
+          isPrivate: false
+          description: "Retourne le profil de l'utilisateur identifie par le token.
+            Attendu : 200 + utilisateur."
+          sortKey: -1780596979193
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: 02 — Alertes (cas heureux)
+    meta:
+      id: fld_8d828b8ba7b845a3927245407341bff3
+      created: 1780596979153
+      modified: 1780596979153
+      sortKey: -1780596979153
+      description: ""
+    children:
+      - url: "{{ base_url }}/api/alertes?page=1&limit=10&sort=horodatage&order=desc"
+        name: GET /api/alertes — liste paginee
+        meta:
+          id: req_a4772a74d90e4167bc0f9137b286d885
+          created: 1780596979198
+          modified: 1780596979198
+          isPrivate: false
+          description: "Liste paginee de toutes les alertes. Attendu : 200 + enveloppe
+            paginee avec creeePar et resoluePar peuples."
+          sortKey: -1780596979198
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes?niveau=critique"
+        name: GET /api/alertes — filtre par niveau critique
+        meta:
+          id: req_9908aee0f6094015b59aaeda2f7f412b
+          created: 1780596979202
+          modified: 1780596979202
+          isPrivate: false
+          description: "Filtre les alertes de niveau critique uniquement. Attendu : 200."
+          sortKey: -1780596979202
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes?resolue=false"
+        name: GET /api/alertes — filtre non resolues
+        meta:
+          id: req_da05eb05e6694527add66694eec5b4e2
+          created: 1780596979208
+          modified: 1780596979208
+          isPrivate: false
+          description: "Filtre les alertes non resolues. Attendu : 200."
+          sortKey: -1780596979208
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes?q=seuil"
+        name: GET /api/alertes — recherche dans message
+        meta:
+          id: req_1ad0d060639d412894e85b859375d2b7
+          created: 1780596979213
+          modified: 1780596979213
+          isPrivate: false
+          description: "Recherche insensible a la casse dans le champ message. Attendu :
+            200."
+          sortKey: -1780596979213
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes"
+        name: POST /api/alertes — creer — 201
+        meta:
+          id: req_d026ec542dfe44d2a77dc76d5ae41dec
+          created: 1780596979217
+          modified: 1780596979217
+          isPrivate: false
+          description: "Cree une nouvelle alerte. Copier l'id retourne dans la variable
+            alerte_id. Attendu : 201. Le champ creeePar doit contenir le
+            courriel de l'operateur."
+          sortKey: -1780596979217
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "source": "Station Montreal-Nord",
+              "type": "temperature",
+              "niveau": "critique",
+              "message": "Canicule : temperature de 40 C, seuil de 32 C depasse"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: Authorization
+            value: Bearer {{ token_operateur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/{{ alerte_id }}"
+        name: GET /api/alertes/:id — une alerte — 200
+        meta:
+          id: req_6335d514f4c54da7906fc7aa93fc1db4
+          created: 1780596979223
+          modified: 1780596979223
+          isPrivate: false
+          description: "Recupere une alerte par son id. Attendu : 200 + alerte avec
+            creeePar peuple."
+          sortKey: -1780596979223
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/{{ alerte_id }}/resolue"
+        name: PATCH /api/alertes/:id/resolue — 200
+        meta:
+          id: req_0766f145c2eb4435b8d86e48709b9b95
+          created: 1780596979228
+          modified: 1780596979228
+          isPrivate: false
+          description: "Marque l'alerte comme resolue. Attendu : 200. Le champ resoluePar
+            doit contenir le courriel de l'operateur."
+          sortKey: -1780596979228
+        method: PATCH
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_operateur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/{{ alerte_id }}"
+        name: PUT /api/alertes/:id — remplacer — 200
+        meta:
+          id: req_983dc19fed31459eae9d5893a796ee4a
+          created: 1780596979233
+          modified: 1780596979233
+          isPrivate: false
+          description: "Remplace entierement l'alerte. Seul l'administrateur peut faire
+            PUT. Attendu : 200."
+          sortKey: -1780596979233
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "source": "Station Laval-Sud",
+              "type": "vent",
+              "niveau": "avertissement",
+              "message": "Vent fort : 80 km/h, seuil de 70 km/h depasse"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: Authorization
+            value: Bearer {{ token_admin }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/{{ alerte_id }}"
+        name: DELETE /api/alertes/:id — 200
+        meta:
+          id: req_2f52400a0d58491c878d82823e6441c3
+          created: 1780596979238
+          modified: 1780596979238
+          isPrivate: false
+          description: "Supprime l'alerte. Seul l'administrateur peut supprimer. Attendu :
+            200."
+          sortKey: -1780596979238
+        method: DELETE
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_admin }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: 03 — Statistiques
+    meta:
+      id: fld_3572bc063c354bc48e8ea8627fcb23e8
+      created: 1780596979158
+      modified: 1780596979158
+      sortKey: -1780596979158
+      description: ""
+    children:
+      - url: "{{ base_url }}/api/statistiques"
+        name: GET /api/statistiques — admin — 200
+        meta:
+          id: req_0dd3421c0a5d493e917ff7ab83d2c9d7
+          created: 1780596979242
+          modified: 1780596979242
+          isPrivate: false
+          description: "Tableau de bord des 24 dernieres heures. Attendu : 200 + 4
+            sections (alertesParNiveau, alertesResoluesVsOuvertes, topSources,
+            totalAlertes24h)."
+          sortKey: -1780596979242
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_admin }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: 04 — Cas d'erreur
+    meta:
+      id: fld_1b74e69a104a4530adeaf34f0d4e14ab
+      created: 1780596979162
+      modified: 1780596979162
+      sortKey: -1780596979162
+      description: ""
+    children:
+      - url: "{{ base_url }}/api/auth/inscription"
+        name: Inscription — 400 (mot de passe trop court)
+        meta:
+          id: req_35a0069056644d9694b9a27f2f929afe
+          created: 1780596979247
+          modified: 1780596979247
+          isPrivate: false
+          description: "Le mot de passe fait moins de 8 caracteres. Attendu : 400."
+          sortKey: -1780596979247
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "test2@exemple.ca",
+              "nom": "Test Court",
+              "motDePasse": "abc"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/inscription"
+        name: Inscription — 400 (courriel invalide)
+        meta:
+          id: req_fa2e769eafdd4675bd8820c18a99367c
+          created: 1780596979253
+          modified: 1780596979253
+          isPrivate: false
+          description: "Le courriel ne respecte pas le format. Attendu : 400."
+          sortKey: -1780596979253
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "pas-un-courriel",
+              "nom": "Test Invalide",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/inscription"
+        name: Inscription — 409 (courriel deja pris)
+        meta:
+          id: req_2a1a66accde546d8a479418e3749b3f6
+          created: 1780596979258
+          modified: 1780596979258
+          isPrivate: false
+          description: "Le courriel est deja utilise. Attendu : 409."
+          sortKey: -1780596979258
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "lecteur@cours.qc.ca",
+              "nom": "Doublon",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/connexion"
+        name: Connexion — 401 (mauvais mot de passe)
+        meta:
+          id: req_43ac22f9696743daa21cf381f6043832
+          created: 1780596979263
+          modified: 1780596979263
+          isPrivate: false
+          description: "Le mot de passe est incorrect. Le message retourne doit etre
+            neutre (ne pas indiquer si le courriel existe). Attendu : 401."
+          sortKey: -1780596979263
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "lecteur@cours.qc.ca",
+              "motDePasse": "mauvaismdp"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/auth/connexion"
+        name: Connexion — 401 (courriel inconnu)
+        meta:
+          id: req_01437e97fcf8486ba32489351dd46bf9
+          created: 1780596979269
+          modified: 1780596979269
+          isPrivate: false
+          description: "Le courriel n'existe pas. Le message doit etre identique au cas
+            mauvais mot de passe. Attendu : 401."
+          sortKey: -1780596979269
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "courriel": "inconnu@exemple.ca",
+              "motDePasse": "Motdepasse1!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes"
+        name: POST /api/alertes — 401 (sans token)
+        meta:
+          id: req_67bb018213f441269047c1c7b181c1b4
+          created: 1780596979274
+          modified: 1780596979274
+          isPrivate: false
+          description: "Aucun token dans l'en-tete Authorization. Attendu : 401."
+          sortKey: -1780596979274
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "source": "Test",
+              "type": "temperature",
+              "niveau": "info",
+              "message": "Test sans token"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes"
+        name: POST /api/alertes — 403 (role lecteur insuffisant)
+        meta:
+          id: req_d8e6e1194bbb4a25ada7b144ee68e01c
+          created: 1780596979279
+          modified: 1780596979279
+          isPrivate: false
+          description: "Un lecteur tente de creer une alerte. Attendu : 403."
+          sortKey: -1780596979279
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "source": "Test",
+              "type": "temperature",
+              "niveau": "info",
+              "message": "Tentative interdite par un lecteur"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/{{ alerte_id }}"
+        name: DELETE /api/alertes/:id — 403 (role operateur insuffisant)
+        meta:
+          id: req_e727f7b5f49c45d58802cd594cef729a
+          created: 1780596979284
+          modified: 1780596979284
+          isPrivate: false
+          description: "Un operateur tente de supprimer une alerte. Seul l'admin peut
+            supprimer. Attendu : 403."
+          sortKey: -1780596979284
+        method: DELETE
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_operateur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/000000000000000000000000"
+        name: GET /api/alertes/:id — 404 (id inexistant)
+        meta:
+          id: req_d74eee66e5194eb584e8b2ac77aca70f
+          created: 1780596979288
+          modified: 1780596979288
+          isPrivate: false
+          description: "L'id est valide comme ObjectId mais n'existe pas en base. Attendu
+            : 404."
+          sortKey: -1780596979288
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes/pas-un-id-valide"
+        name: GET /api/alertes/:id — 400 (id mal forme)
+        meta:
+          id: req_abcadd24b06444dd820d8c769264b587
+          created: 1780596979295
+          modified: 1780596979295
+          isPrivate: false
+          description: "L'id n'est pas un ObjectId MongoDB valide. Attendu : 400."
+          sortKey: -1780596979295
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes"
+        name: POST /api/alertes — 400 (champ obligatoire manquant)
+        meta:
+          id: req_a4bb520a915f41568c14acea07ad6810
+          created: 1780596979301
+          modified: 1780596979301
+          isPrivate: false
+          description: "Le champ 'source' est absent. Attendu : 400 + message de
+            validation Mongoose."
+          sortKey: -1780596979301
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "type": "temperature",
+              "niveau": "info",
+              "message": "Champ source manquant"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: Authorization
+            value: Bearer {{ token_operateur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes"
+        name: POST /api/alertes — 400 (niveau hors enum)
+        meta:
+          id: req_b521ae094e694c96a40e61ec6e7d6066
+          created: 1780596979305
+          modified: 1780596979305
+          isPrivate: false
+          description: "Le niveau 'urgent' n'est pas dans l'enum. Attendu : 400."
+          sortKey: -1780596979306
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "source": "Station Test",
+              "type": "temperature",
+              "niveau": "urgent",
+              "message": "Niveau invalide"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: Authorization
+            value: Bearer {{ token_operateur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/statistiques"
+        name: GET /api/statistiques — 403 (role lecteur)
+        meta:
+          id: req_4d53ee2262774d1d8d1d49c680320ffd
+          created: 1780596979310
+          modified: 1780596979310
+          isPrivate: false
+          description: "Un lecteur tente d'acceder aux statistiques. Attendu : 403."
+          sortKey: -1780596979310
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/statistiques"
+        name: GET /api/statistiques — 401 (sans token)
+        meta:
+          id: req_0e5c78666bed4b868ebc0e59a13f6744
+          created: 1780596979314
+          modified: 1780596979314
+          isPrivate: false
+          description: "Acces sans token. Attendu : 401."
+          sortKey: -1780596979314
+        method: GET
+        body:
+          mimeType: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/alertes?niveau=urgent"
+        name: GET /api/alertes — 400 (niveau invalide dans query)
+        meta:
+          id: req_57a5b11a44c341dd963fff551fca7525
+          created: 1780596979319
+          modified: 1780596979319
+          isPrivate: false
+          description: "Le parametre niveau contient une valeur hors enum. Attendu : 400."
+          sortKey: -1780596979319
+        method: GET
+        body:
+          mimeType: application/json
+        headers:
+          - name: Authorization
+            value: Bearer {{ token_lecteur }}
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_c594a0b4fa7664bb17b5f1b5f6bc00762f5ce1c5
+    created: 1780596981675
+    modified: 1780596981675
+environments:
+  name: Base
+  meta:
+    id: env_7bafdef0db4e449db30ec747cbcf4fdd
+    created: 1780596979135
+    modified: 1780596979135
+    isPrivate: false
+  data:
+    base_url: http://localhost:3000
+    token_lecteur: ""
+    token_operateur: ""
+    token_admin: ""
+    alerte_id: ""
