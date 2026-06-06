@@ -2,10 +2,8 @@
 
 ## Description
 
-Ce programme simule un réseau de stations météo connectées.
-Il lit en continu des capteurs simulés (température, humidité, pression,
-vent, précipitations) et publie automatiquement une alerte sur le serveur
-dès qu'une valeur dépasse les seuils configurés.
+Ce programme simule un réseau de stations météo connectées dans le cadre du projet final "Console de supervision d'alertes météo sécurisée".
+Il lit en continu des capteurs simulés (température, humidité, pression, vent, précipitations) et publie automatiquement une alerte sur le serveur dès qu'une valeur dépasse les seuils configurés.
 
 ## Prérequis
 
